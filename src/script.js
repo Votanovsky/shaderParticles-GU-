@@ -22,9 +22,10 @@ const scene = new THREE.Scene()
 // Lights
 
 const pointLight = new THREE.PointLight(0xffffff, 0.1)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
+// pointLight.position.x = 2
+// pointLight.position.y = 3
+// pointLight.position.z = 4
+pointLight.position.set(2, 3, 4)
 scene.add(pointLight)
 
 /**
@@ -68,7 +69,8 @@ controls.enableDamping = true
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
+    // canvas: canvas,
+    canvas,
     alpha: true
 })
 renderer.setSize(sizes.width, sizes.height)
@@ -97,11 +99,15 @@ function postProcessing() {
 function initSettings() {
     const settings = {
         distortion: 0,
-        bloomStrength: 0,
+        bloomStrength: 1.5,
+        bloomRadius: .4,
+        bloomThreshold: .35
     }
 
     gui.add(settings, "distortion", 0, 3, .001)
+    gui.add(settings, "bloomRadius", 0, 100, .1)
     gui.add(settings, "bloomStrength", 0, 10, .01)
+    gui.add(settings, "bloomThreshold", 0, 1, .01)
 
     return settings
 }
@@ -124,19 +130,22 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
 
     utime+=0.05
-
     // Update Orbital Controls
     controls.update()
 
     // Render
-    renderer.render(scene, camera)
+    composer.render()
+    // renderer.render(scene, camera)
 
     // Call tick again on the next frame
-    window.requestAnimationFrame(tick)
     composer.passes[1].strength = settings.bloomStrength
+    composer.passes[1].radius = settings.bloomRadius
+    composer.passes[1].threshold = settings.bloomThreshold
     
     updateUniforms()
     // console.log(composer.passes[1].strength)
+    
+    window.requestAnimationFrame(tick)
 }
 
 tick()
