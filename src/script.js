@@ -188,7 +188,7 @@ const material = new THREE.ShaderMaterial({
         progress: {type: "float", value: utime},
         distortion: {type: "float", value: 0},
         t: {type: "t", value: new THREE.TextureLoader().load(t)},
-        t1: {type: "t", value: new THREE.TextureLoader().load(t1)},
+        t1: {type: "t", value: new THREE.TextureLoader().load(t2)},
         resolution: {tupe: "v4", value: new THREE.Vector4()},
         uvRate1: {
             value: new THREE.Vector2(1,1)
@@ -209,8 +209,8 @@ const material1 = new THREE.ShaderMaterial({
         time: {type: "float", value: utime},
         progress: {type: "float", value: utime},
         distortion: {type: "float", value: 0},
-        t: {type: "t", value: new THREE.TextureLoader().load(t2)},
-        t1: {type: "t", value: new THREE.TextureLoader().load(t3)},
+        t: {type: "t", value: new THREE.TextureLoader().load(t3)},
+        t1: {type: "t", value: new THREE.TextureLoader().load(t1)},
         resolution: {tupe: "v4", value: new THREE.Vector4()},
         uvRate1: {
             value: new THREE.Vector2(1,1)
@@ -229,7 +229,6 @@ const mesh1 = new THREE.Points(geometry,material1)
 
 // gsap ===========
 video.addEventListener('ended', ()=> {
-    scene.clear()
     scene.add(mesh)
     gsap.to(video, {
         duration: 0.1,
@@ -270,6 +269,11 @@ video.addEventListener('ended', ()=> {
                 duration: 0.1,
                 opacity: 1
             })
+            gsap.to(material.uniforms.progress, {
+                duration: 1,
+                value:0,
+            })
+            scene.clear()
             // video.currentTime = 0;
             // video.play();
             // gsap.to(video, {
@@ -281,19 +285,18 @@ video.addEventListener('ended', ()=> {
 })
 
 video2.addEventListener('ended', ()=> {
-    scene.clear()
     scene.add(mesh1)
     gsap.to(video2, {
         duration: 0.1,
         opacity: 0
     })
-    gsap.to(material.uniforms.distortion, {
+    gsap.to(material1.uniforms.distortion, {
         duration: 3,
         value:1.5,
         ease: "power2.inOut"
     })
 
-    gsap.to(material.uniforms.progress, {
+    gsap.to(material1.uniforms.progress, {
         duration: 1,
         delay:1.5,
         value:1,
@@ -304,7 +307,7 @@ video2.addEventListener('ended', ()=> {
         strength:5,
         ease: "power2.in"
     })
-    gsap.to(material.uniforms.distortion, {
+    gsap.to(material1.uniforms.distortion, {
         duration: 2,
         value:0,
         delay: 2,
@@ -322,6 +325,11 @@ video2.addEventListener('ended', ()=> {
                 duration: 0.1,
                 opacity: 1
             })
+            gsap.to(material1.uniforms.progress, {
+                duration: 1,
+                value:0,
+            })
+            scene.clear()
             // video.currentTime = 0;
             // video.play();
             // gsap.to(video, {
