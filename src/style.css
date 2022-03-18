@@ -15,6 +15,24 @@ body
     background: #000;
 }
 
+.video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    opacity: 1;
+    /* border: 3px solid #f00; */
+    pointer-events: none;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    box-sizing: border-box;
+    width: 40vh;
+    height: 68.5vh;
+}
+.video video {
+    width: 100%;
+}
 .webgl
 {
     position: fixed;
