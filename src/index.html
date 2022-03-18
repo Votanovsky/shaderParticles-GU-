@@ -7,6 +7,12 @@
 </head>
 <body>
     <canvas class="webgl"></canvas>
+    <div class="video">
+        <video id="video1" src="../static/01.mp4" muted autoplay></video>
+    </div>
+    <div class="video">
+        <video id="video3" src="../static/03.mp4" muted style="opacity: 0;"></video>
+    </div>
 
     <script id='vertex-shader' type='x-shader/x-vertex'>
         uniform float time;
@@ -90,8 +96,8 @@
             vUv = uv;
 
             vec3 distortion1 = vec3(position.x*2.,position.y,1.)*curlNoise(vec3(
-                position.x*0.0008 + time*0.05,
-                position.y*0.0002 + time*0.05,
+                position.x*0.002 + time*0.05,
+                position.y*0.008 + time*0.05,
                 (position.x + position.y)*0.02
             ))*distortion;
 
@@ -107,6 +113,7 @@
         uniform float time;
         uniform float progress;
         uniform sampler2D t;
+        uniform sampler2D t1;
         uniform vec4 resolution;
         varying vec2 vUv;
         varying vec3 vPosition;
@@ -117,9 +124,15 @@
             //gl_FragColor = vec4(1.,0.,0.0,1.);
 
             vec4 tt = texture2D(t,vUv);
-            gl_FragColor = vec4(vUv,0.,1.);
-            gl_FragColor = tt;
+            vec4 tt1 = texture2D(t1,vUv);
+            vec4 finalTexture = mix(tt, tt1, progress);
+
+            //gl_FragColor = vec4(vUv,0.,1.);
+
+            gl_FragColor = finalTexture;
+
             if(gl_FragColor.r<0.1 && gl_FragColor.b<0.1 && gl_FragColor.g<0.1) discard;
+            //gl_FragColor = vec4(1.,0.,0.,0.5);
         }
     </script>
 </body>

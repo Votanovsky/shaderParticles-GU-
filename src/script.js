@@ -7,9 +7,20 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 import * as dat from 'dat.gui'
+import gsap from 'gsap'
+
+console.log(gsap);
 
 
-import t from '../static/4.jpg'
+import t from '../static/01-end.jpg'
+import t1 from '../static/01-first.jpg'
+import t2 from '../static/02-first.jpg'
+import t3 from '../static/02-end.jpg'
+
+const video = document.getElementById('video1')
+const video2 = document.getElementById('video3')
+
+
 // Debug
 const gui = new dat.GUI()
 
@@ -76,14 +87,13 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-
-
+let bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
 const settings = initSettings()
 // Bloom
 function postProcessing() {
     let renderScene = new RenderPass( scene, camera );
 
-    let bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+    // let bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
     // bloomPass.threshold = params.bloomThreshold;
     // bloomPass.strength = params.bloomStrength;
     // bloomPass.radius = params.bloomRadius;
@@ -99,9 +109,9 @@ function postProcessing() {
 function initSettings() {
     const settings = {
         distortion: 0,
-        bloomStrength: 1.5,
-        bloomRadius: .4,
-        bloomThreshold: .35
+        bloomStrength: 0,
+        bloomRadius: 0,
+        bloomThreshold: 0
     }
 
     gui.add(settings, "distortion", 0, 3, .001)
@@ -155,7 +165,7 @@ function updateUniforms() {
         if (child instanceof THREE.Points
             && child.material.type === 'ShaderMaterial') {
             child.material.uniforms.time.value = utime;
-            child.material.uniforms.distortion.value = settings.distortion;
+            // child.material.uniforms.distortion.value = settings.distortion;
             // bloomPass.strength = settings.bloomStrength;
             child.material.needsUpdate = true;
             
@@ -165,7 +175,7 @@ function updateUniforms() {
 }
 
 // Objects
-const geometry = new THREE.PlaneBufferGeometry( 1920, 1080, 900, 900);
+const geometry = new THREE.PlaneBufferGeometry( 480*1.745, 820*1.745, 480, 820);
 
 // Materials
 const material = new THREE.ShaderMaterial({
@@ -175,8 +185,32 @@ const material = new THREE.ShaderMaterial({
     // side: THREE.DoubleSide,
     uniforms: {
         time: {type: "float", value: utime},
+        progress: {type: "float", value: utime},
         distortion: {type: "float", value: 0},
         t: {type: "t", value: new THREE.TextureLoader().load(t)},
+        t1: {type: "t", value: new THREE.TextureLoader().load(t2)},
+        resolution: {tupe: "v4", value: new THREE.Vector4()},
+        uvRate1: {
+            value: new THREE.Vector2(1,1)
+        }
+    },
+    vertexShader:   document.getElementById('vertex-shader').textContent,
+    fragmentShader: document.getElementById('fragment-shader').textContent
+
+    
+});
+
+const material1 = new THREE.ShaderMaterial({
+    // extensions: {
+    //     derivatives: "#extension GL_OES_standard_derivatives : enable"
+    // },
+    // side: THREE.DoubleSide,
+    uniforms: {
+        time: {type: "float", value: utime},
+        progress: {type: "float", value: utime},
+        distortion: {type: "float", value: 0},
+        t: {type: "t", value: new THREE.TextureLoader().load(t3)},
+        t1: {type: "t", value: new THREE.TextureLoader().load(t1)},
         resolution: {tupe: "v4", value: new THREE.Vector4()},
         uvRate1: {
             value: new THREE.Vector2(1,1)
@@ -190,4 +224,118 @@ const material = new THREE.ShaderMaterial({
 
 // Mesh
 const mesh = new THREE.Points(geometry,material)
-scene.add(mesh)
+const mesh1 = new THREE.Points(geometry,material1)
+
+
+// gsap ===========
+video.addEventListener('ended', ()=> {
+    scene.add(mesh)
+    gsap.to(video, {
+        duration: 0.1,
+        opacity: 0
+    })
+    gsap.to(material.uniforms.distortion, {
+        duration: 3,
+        value:1.5,
+        ease: "power2.inOut"
+    })
+
+    gsap.to(material.uniforms.progress, {
+        duration: 1,
+        delay:1.5,
+        value:1,
+    })
+
+    gsap.to(bloomPass, {
+        duration: 2,
+        strength:5,
+        ease: "power2.in"
+    })
+    gsap.to(material.uniforms.distortion, {
+        duration: 2,
+        value:0,
+        delay: 2,
+        ease: "power2.inOut"
+    })
+    gsap.to(bloomPass, {
+        duration: 2,
+        strength:0,
+        delay: 2,
+        ease: "power2.out",
+        onComplete:()=> {
+            video2.currentTime = 0;
+            video2.play()
+            gsap.to(video2, {
+                duration: 0.1,
+                opacity: 1
+            })
+            gsap.to(material.uniforms.progress, {
+                duration: 1,
+                value:0,
+            })
+            scene.clear()
+            // video.currentTime = 0;
+            // video.play();
+            // gsap.to(video, {
+            //     duration: 0.1,
+            //     opacity: 1
+            // })
+        }
+    })
+})
+
+video2.addEventListener('ended', ()=> {
+    scene.add(mesh1)
+    gsap.to(video2, {
+        duration: 0.1,
+        opacity: 0
+    })
+    gsap.to(material1.uniforms.distortion, {
+        duration: 3,
+        value:1.5,
+        ease: "power2.inOut"
+    })
+
+    gsap.to(material1.uniforms.progress, {
+        duration: 1,
+        delay:1.5,
+        value:1,
+    })
+
+    gsap.to(bloomPass, {
+        duration: 2,
+        strength:5,
+        ease: "power2.in"
+    })
+    gsap.to(material1.uniforms.distortion, {
+        duration: 2,
+        value:0,
+        delay: 2,
+        ease: "power2.inOut"
+    })
+    gsap.to(bloomPass, {
+        duration: 2,
+        strength:0,
+        delay: 2,
+        ease: "power2.out",
+        onComplete:()=> {
+            video.currentTime = 0;
+            video.play()
+            gsap.to(video, {
+                duration: 0.1,
+                opacity: 1
+            })
+            gsap.to(material1.uniforms.progress, {
+                duration: 1,
+                value:0,
+            })
+            scene.clear()
+            // video.currentTime = 0;
+            // video.play();
+            // gsap.to(video, {
+            //     duration: 0.1,
+            //     opacity: 1
+            // })
+        }
+    })
+})
